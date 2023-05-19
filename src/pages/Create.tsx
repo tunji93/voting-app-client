@@ -33,7 +33,7 @@ const Create: React.FC = () => {
   
       const { data, error } = await makeRequest<{
         poll: Poll;
-        accessToken: string;
+        access_token: string;
       }>('/poll', {
         method: 'POST',
         body: JSON.stringify({
@@ -52,7 +52,7 @@ const Create: React.FC = () => {
         setApiError(error.messages[0]);
       } else {
         actions.initializePoll(data.poll);
-        actions.setPollAccessToken(data.accessToken);
+        actions.setPollAccessToken(data.access_token);
         actions.setPage(AppPage.WaitingRoom);
       }
   
