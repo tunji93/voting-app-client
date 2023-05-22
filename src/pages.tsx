@@ -17,7 +17,7 @@ const routeConfig = {
   const Pages: React.FC = () => {
     const currentState = useSnapshot(state);
     useEffect(() => {
-        if (currentState.user?.id && !currentState.poll?.hasStarted) {
+        if (currentState.user?.id &&  currentState.poll && !currentState.poll?.hasStarted) {
           actions.setPage(AppPage.WaitingRoom);
         }
       }, [currentState.user?.id, currentState.poll?.hasStarted]);

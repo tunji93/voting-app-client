@@ -16,6 +16,14 @@ type User = {
   id: string;
   name: string;
 };
+type WsError = {
+    type: string;
+    message: string;
+  };
+  
+  type WsErrorUnique = WsError & {
+    id: string;
+  };
 
 export type AppState = {
   isLoading: boolean;
@@ -24,11 +32,13 @@ export type AppState = {
   accessToken?: string;
   user?: User;
   socket?: Socket;
+  wsErrors: WsErrorUnique[];
 };
 
 const state: AppState = proxy({
   isLoading: false,
   currentPage: AppPage.Welcome,
+  wsErrors: []
 });
 
 const stateWithComputed: AppState = derive(
@@ -94,6 +104,18 @@ const actions = {
   updatePoll: (poll: Poll): void => {
     state.poll = poll;
   },
+  addWsError: (error: WsError): void => {
+    state.wsErrors = [
+      ...state.wsErrors,
+      {
+        ...error,
+        id: nanoid(6),
+      },
+    ];
+  },
+  removeWsError: (id: string): void => {
+    state.wsErrors = state.wsErrors.filter((error) => error.id !== id);
+  },
 };
 
 subscribeKey(state, "accessToken", () => {
@@ -104,3 +126,7 @@ subscribeKey(state, "accessToken", () => {
 export type AppActions = typeof actions;
 
 export { stateWithComputed as state, actions };
+    function nanoid(arg0: number): string {
+        throw new Error("Function not implemented.");
+    }
+
