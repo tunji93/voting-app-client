@@ -5,12 +5,12 @@ import { actions, AppPage } from '../state';
 import { Poll } from '../types';
 
 const Join: React.FC = () => {
-    const [pollID, setPollID] = useState('');
+    const [pollId, setPollId] = useState('');
     const [name, setName] = useState('');
     const [apiError, setApiError] = useState('');
   
     const areFieldsValid = (): boolean => {
-      if (pollID.length < 6 || pollID.length > 6) {
+      if (pollId.length < 6 || pollId.length > 6) {
         return false;
       }
   
@@ -27,11 +27,11 @@ const Join: React.FC = () => {
   
       const { data, error } = await makeRequest<{
         poll: Poll;
-        accessToken: string;
-      }>('/polls/join', {
+        access_token: string;
+      }>('/poll/join', {
         method: 'POST',
         body: JSON.stringify({
-          pollID,
+          pollId,
           name,
         }),
       });
@@ -42,7 +42,7 @@ const Join: React.FC = () => {
         setApiError('Unknown API error');
       } else {
         actions.initializePoll(data.poll);
-        actions.setPollAccessToken(data.accessToken);
+        actions.setPollAccessToken(data.access_token);
         actions.setPage(AppPage.WaitingRoom);
       }
   
@@ -59,7 +59,7 @@ const Join: React.FC = () => {
             <div className="text-center w-full">
               <input
                 maxLength={6}
-                onChange={(e) => setPollID(e.target.value.toUpperCase())}
+                onChange={(e) => setPollId(e.target.value.toUpperCase())}
                 className="box info w-full"
                 autoCapitalize="characters"
                 style={{ textTransform: 'uppercase' }}
