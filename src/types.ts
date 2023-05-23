@@ -3,7 +3,7 @@ export type Nomination = {
     userId: string;
     text: string;
   };
-type Participants = {
+export type Participants = {
     [participantId: string]: string;
   };
   

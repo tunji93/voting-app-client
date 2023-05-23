@@ -1,6 +1,7 @@
 import { Socket } from "socket.io-client";
+import { nanoid } from 'nanoid';
 import { proxy, ref } from "valtio";
-import { derive, subscribeKey } from "valtio/utils";
+import { subscribeKey } from "valtio/utils";
 import { createSocketWithHandlers, socketIOUrl } from "./socket-io";
 import { Poll } from "./types";
 import { getTokenPayload } from "./utils";
@@ -25,56 +26,60 @@ type WsError = {
     id: string;
   };
 
-export type AppState = {
-  isLoading: boolean;
-  currentPage: AppPage;
-  poll?: Poll;
-  accessToken?: string;
-  user?: User;
-  socket?: Socket;
-  wsErrors: WsErrorUnique[];
-};
-
-const state: AppState = proxy({
-  isLoading: false,
-  currentPage: AppPage.Welcome,
-  wsErrors: []
-});
-
-const stateWithComputed: AppState = derive(
-  {
-    user: (get) => {
-      const accessToken = get(state).accessToken;
-
+  export type AppState = {
+    isLoading: boolean;
+    currentPage: AppPage;
+    poll?: Poll;
+    accessToken?: string;
+    socket?: Socket;
+    wsErrors: WsErrorUnique[];
+    user?: User;
+    isAdmin: boolean;
+    nominationCount: number;
+    participantCount: number;
+    canStartVote: boolean;
+  };
+  
+  const state = proxy<AppState>({
+    isLoading: false,
+    currentPage: AppPage.Welcome,
+    wsErrors: [],
+    get user() {
+      const accessToken = this.accessToken;
+  
       if (!accessToken) {
         return;
       }
-
+  
       const token = getTokenPayload(accessToken);
-
+  
       return {
         id: token.sub,
         name: token.name,
       };
     },
-    isAdmin: (get) => {
-      if (!get(state).user) {
+    get isAdmin() {
+      if (!this.user) {
         return false;
       }
-      return get(state).user?.id === get(state).poll?.adminId;
+      return this.user?.id === this.poll?.adminId;
     },
-  },
-  {
-    proxy: state,
-  }
-);
+    get participantCount() {
+      return Object.keys(this.poll?.participants || {}).length;
+    },
+    get nominationCount() {
+      return Object.keys(this.poll?.nominations || {}).length;
+    },
+    get canStartVote() {
+      const votesPerVoter = this.poll?.votesPerVoter ?? 100;
+  
+      return this.nominationCount >= votesPerVoter;
+    },
+  });
 
 const actions = {
   setPage: (page: AppPage): void => {
     state.currentPage = page;
-  },
-  startOver: (): void => {
-    actions.setPage(AppPage.Welcome);
   },
   startLoading: (): void => {
     state.isLoading = true;
@@ -104,6 +109,31 @@ const actions = {
   updatePoll: (poll: Poll): void => {
     state.poll = poll;
   },
+  nominate: (text: string): void => {
+    state.socket?.emit('nominate', { text });
+  },
+  startOver: (): void => {
+    actions.reset();
+    localStorage.removeItem('accessToken');
+    actions.setPage(AppPage.Welcome);
+  },
+  reset: (): void => {
+    state.socket?.disconnect();
+    state.poll = undefined;
+    state.accessToken = undefined;
+    state.isLoading = false;
+    state.socket = undefined;
+    state.wsErrors = [];
+  },
+  removeNomination: (id: string): void => {
+    state.socket?.emit('remove_nomination', { id });
+  },
+  removeParticipant: (id: string): void => {
+    state.socket?.emit('remove_participant', { id });
+  },
+  startVote: (): void => {
+    state.socket?.emit('start_vote');
+  },
   addWsError: (error: WsError): void => {
     state.wsErrors = [
       ...state.wsErrors,
@@ -125,8 +155,7 @@ subscribeKey(state, "accessToken", () => {
 });
 export type AppActions = typeof actions;
 
-export { stateWithComputed as state, actions };
-    function nanoid(arg0: number): string {
-        throw new Error("Function not implemented.");
-    }
+export { state, actions };
+   
+    
 

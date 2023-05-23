@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { state, actions, AppPage } from '../state';
+import {actions, AppPage } from '../state';
 
 
 
