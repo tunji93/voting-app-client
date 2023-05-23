@@ -37,6 +37,18 @@ const App: React.FC = () => {
     actions.initializeSocket();
   }, []);
 
+  useEffect(() => {
+    const myId = currentState.user?.id;
+
+    if (
+      myId &&
+      currentState.socket?.connected &&
+      !currentState.poll?.participants[myId]
+    ) {
+      actions.startOver();
+    }
+  }, [currentState.poll?.participants]);
+
   return (
     <>
       <Loader isLoading={currentState.isLoading} color="orange" width={120} />
