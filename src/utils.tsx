@@ -13,7 +13,7 @@ export const getTokenPayload = (accessToken: string): TokenPayload =>
 
   
 export const colorizeText = (text: string): JSX.Element[] =>
-  text.split('').map((val, index) => {
+  text?.split('').map((val, index) => {
     return val.charCodeAt(0) >= 48 && val.charCodeAt(0) <= 57 ? (
         <span key={index} className="text-orange-600">
           {val}

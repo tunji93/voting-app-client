@@ -24,13 +24,13 @@ export type Participants = {
     hasStarted: boolean;
     nominations: Nominations;
     rankings: Rankings;
-    results: Result[];
+    results: Results;
   };
 
-  export type Result = {
+  export type Results = Array<{
     score: number;
     nominationId: string;
     text: string;
-  };
+  }>;
   
   
